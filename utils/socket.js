@@ -15,6 +15,8 @@ class Socket{
 
             socket.on('chat-list', async (userId) => {
 
+
+
                let chatListResponse = {};
 
                 if (userId === '' && (typeof userId !== 'string' || typeof userId !== 'number')) {
@@ -24,12 +26,17 @@ class Socket{
                     
                     this.io.emit('chat-list-response',chatListResponse);
                 }else{
-                    const result = await helper.getChatList(userId, socket.id);
+                    var chats = await helper.getChats(userId);
+                    const result = await helper.getChatList(userId, socket.id, chats);
+
+                    if(result != null){
                     this.io.to(socket.id).emit('chat-list-response', {
                         error: result !== null ? false : true,
                         singleUser: false,
                         chatList: result.chatlist
                     });
+                
+
 
                     socket.broadcast.emit('chat-list-response', {
                         error: result !== null ? false : true,
@@ -37,7 +44,41 @@ class Socket{
                         chatList: result.userinfo
                     });
                 }
+                }
             });
+
+
+            socket.on('open-chats', async (data) => {
+                    var fromchats = await helper.getChats(data.fromUserId);
+                    var tochats = await helper.getChats(data.toUserId);
+                    const sqlResult = await helper.addChat({
+                        fromUserId: data.fromUserId,
+                        toUserId: data.toUserId,
+                        fromchats: fromchats,
+                        tochats: tochats
+                    });
+            });
+
+            socket.on('delete-chat', async (data) => {
+                    var chats = await helper.getChats(data.fromUserId);
+                    const sqlResult = await helper.deleteChat({
+                        fromUserId: data.fromUserId,
+                        deleteId: data.deleteId,
+                        chats: chats
+                    });
+            });
+
+            socket.on('username-check', async (data) => {
+
+                var check = await helper.usernameChecker(data);
+                               
+                    let checkResponse = {};
+                    checkResponse.error = check;
+
+                    this.io.emit('username-check-response',checkResponse);
+            });
+
+
 
 
             socket.on('add-message', async (data) => {

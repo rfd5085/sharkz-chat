@@ -1,5 +1,7 @@
 'user strict';
 
+
+
 app.controller('homeController', function ($scope, $routeParams, $location, appService){
     
     const UserId = $routeParams.userId;
@@ -21,6 +23,7 @@ app.controller('homeController', function ($scope, $routeParams, $location, appS
         }
     })
     .then((response) => {
+        console.log($scope.data.chatlist);
         $scope.data.username = response.username;
         appService.socketEmit(`chat-list`, UserId);
         appService.socketOn('chat-list-response', (response) => {
@@ -53,7 +56,7 @@ app.controller('homeController', function ($scope, $routeParams, $location, appS
                         $scope.data.chatlist = response.chatList;
                     }
                 } else {
-                    alert(`Faild to load Chat list`);
+                    alert(`Failed to load Chat list`);
                 }
             });
         });
@@ -135,8 +138,39 @@ app.controller('homeController', function ($scope, $routeParams, $location, appS
         return fromUserId == UserId ? true : false;
     }
 
-    $scope.logout = () => {
-        appService.socketEmit(`logout`, UserId);
-        $location.path(`/`);
+
+    $scope.createNewChat = () => {
+
+
+             toUserId = document.querySelector('#newChat').value;
+
+            appService.socketEmit(`username-check`, toUserId);
+            appService.socketOn('username-check-response', (response) => {
+            check = response.error;
+        });
+
+            if(toUserId == $scope.data.username){
+                alert(`Please select a username that is not your own.`);
+            }else if(check == false){
+                alert(`That username does not exist`);
+            }else{
+            let messagePacket = {
+                                    fromUserId: UserId,
+                                    toUserId: toUserId,
+                                };
+                                appService.socketEmit(`open-chats`, messagePacket);
+                                window.location.reload();
+                            }
+
     }
+
+    $scope.deleteChat = (idToDelete) => {
+         let messagePacket = {
+                        fromUserId: UserId,
+                        deleteId: idToDelete,
+                    };
+         appService.socketEmit(`delete-chat`, messagePacket);
+         window.location.reload();
+    }
+
 });

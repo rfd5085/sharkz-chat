@@ -7,7 +7,7 @@ class Db {
 			host: 'localhost',
 			user: 'root',
 			password: '',
-			database: 'chat',
+			database: 'gameuser_game_sharkz',
 			debug: false
 		});
 	}

@@ -33,63 +33,8 @@ class Routes{
 			}
 		});		
 
-		this.app.post('/registerUser', async (request,response) => {
-			const registrationResponse = {}
-			const data = {
-				username : (request.body.username).toLowerCase(),
-				password : request.body.password
-			};			
-			if(data.username === '') {
-	            registrationResponse.error = true;
-	            registrationResponse.message = `username cant be empty.`;
-	            response.status(412).json(registrationResponse);
-	        }else if(data.password === ''){				            
-	            registrationResponse.error = true;
-	            registrationResponse.message = `password cant be empty.`;
-	            response.status(412).json(registrationResponse);
-	        }else{	        	
-				const result = await helper.registerUser( data );
-				if (result === null) {
-					registrationResponse.error = true;
-					registrationResponse.message = `User registration unsuccessful,try after some time.`;
-					response.status(417).json(registrationResponse);
-				} else {
-					registrationResponse.error = false;
-					registrationResponse.userId = result.insertId;
-					registrationResponse.message = `User registration successful.`;
-					response.status(200).json(registrationResponse);
-				}
-	        }
-		});
+		
 
-		this.app.post('/login',async (request,response) =>{
-			const loginResponse = {}
-			const data = {
-				username : (request.body.username).toLowerCase(),
-				password : request.body.password
-			};
-			if(data.username === '' || data.username === null) {
-	            loginResponse.error = true;
-	            loginResponse.message = `username cant be empty.`;
-	            response.status(412).json(loginResponse);
-	        }else if(data.password === '' || data.password === null){				            
-	            loginResponse.error = true;
-	            loginResponse.message = `password cant be empty.`;
-	            response.status(412).json(loginResponse);
-	        }else{
-				const result = await helper.loginUser(data);
-				if (result === null || result.length === 0) {
-					loginResponse.error = true;
-					loginResponse.message = `Invalid username and password combination.`;
-					response.status(401).json(loginResponse);
-				} else {
-					loginResponse.error = false;
-					loginResponse.userId = result[0].id;
-					loginResponse.message = `User logged in.`;
-					response.status(200).json(loginResponse);
-				}
-	        }
-		});
 		
 		this.app.post('/userSessionCheck', async (request,response) =>{
 			const userId = request.body.userId;
