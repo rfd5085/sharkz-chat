@@ -28,6 +28,7 @@ class Socket{
                 }else{
                     var chats = await helper.getChats(userId);
                     const result = await helper.getChatList(userId, socket.id, chats);
+                    const userInfo = await helper.getUserInfo(userId);
 
                     if(result != null){
                     this.io.to(socket.id).emit('chat-list-response', {
@@ -41,7 +42,7 @@ class Socket{
                     socket.broadcast.emit('chat-list-response', {
                         error: result !== null ? false : true,
                         singleUser: true,
-                        chatList: result.userinfo
+                        chatList: userInfo
                     });
                 }
                 }
@@ -104,16 +105,6 @@ class Socket{
                     });
                     this.io.to(toSocketId).emit(`add-message-response`, data); 
                 }               
-            });
-
-
-
-            socket.on('logout', async () => {
-                const isLoggedOut = await helper.logoutUser(socket.id);
-                this.io.to(socket.id).emit('logout-response',{
-                    error : false
-                });
-                socket.disconnect();
             });
 
 
